@@ -1,0 +1,24 @@
+{
+  "simulation_params": {
+    "num_runs": 100,
+    "noise": 0.0
+  },
+  "pokemon_configs": [
+    {
+      "name": "snorlax",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    },
+    {
+      "name": "caterpie",
+      "level": 5,
+      "hp_percentage": 0.5,
+      "status_effect": "sleep"
+    }
+  ],
+  "pokeball_params": {
+    "types": ["pokeball", "ultraball", "heavyball"]
+  },
+  "output_file": "results/mi_experimento.csv"
+}
