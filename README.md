@@ -88,18 +88,34 @@ El archivo CSV generado tendrá las siguientes columnas, permitiendo un análisi
 * `weight`: El peso del Pokémon (útil para analizar la HeavyBall).
 * `speed`: La velocidad del Pokémon (útil para analizar la FastBall).
 
-## Cómo Ejecutar
+### Requisitos
 
-Desde la terminal, parado en la raíz del proyecto:
+- Python3
+- pip3
+- [pipenv](https://pypi.org/project/pipenv/)
+
+### Instalación
+
+Parado en la carpeta del proyecto, instala las dependencias con:
 
 ```sh
-pip install -r requirements.txt
+pipenv install
 ```
+ó si no se usa pipenv
+
+```sh
+pip3 install -r requirements.txt
+```
+
+
+## Ejecución
 
 ```sh
 pipenv run python main.py configs/template.json
 ```
+ó si no se usa pipenv
 
 ```sh
 python3 main.py configs/template.json
 ```
+

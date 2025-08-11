@@ -70,9 +70,9 @@ def main():
                     "noise": noise,
                     "success": success,
                     "capture_rate": capture_rate,
-                    "base_catch_rate": pokemon.catch_rate, # Dato útil para análisis
-                    "weight": pokemon.weight, # Dato útil para análisis
-                    "speed": pokemon.stats.speed # Dato útil para análisis
+                    "base_catch_rate": pokemon.catch_rate,
+                    "weight": pokemon.weight, 
+                    "speed": pokemon.stats.speed
                 })
 
     # --- 3. Guardar Resultados ---

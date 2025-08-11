@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 try:
     df = pd.read_csv('results/q1a_pokeball_avg_effectiveness.csv')
 except FileNotFoundError:
@@ -36,6 +37,7 @@ else:
         yerr=sem_effectiveness.values,
         capsize=5,
     )
+    
 
     # Añadir etiquetas, título y la nota sobre el N
     plt.xlabel('Tipo de Pokebola', fontweight='bold', fontsize=12)
