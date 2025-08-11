@@ -1,0 +1,18 @@
+{
+  "simulation_params": {
+    "num_runs": 100,
+    "noise": 0.0
+  },
+  "pokemon_configs": [
+    {
+      "name": "jolteon",
+      "level": 100,
+      "hp_percentage": 1.0,
+       "status_effect": { "set": ["none", "sleep", "paralysis", "burn", "poison", "freeze"] }
+    }
+  ],
+  "pokeball_params": {
+    "types": ["pokeball", "ultraball", "fastball", "heavyball"]
+  },
+  "output_file": "results/q2a_result.csv"
+}

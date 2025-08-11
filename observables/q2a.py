@@ -1,0 +1,87 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from matplotlib.ticker import PercentFormatter
+from pathlib import Path
+
+try:
+    df = pd.read_csv(Path("../results/q2a_result.csv"))
+except FileNotFoundError:
+    print("El archivo de resultados no fue encontrado. Asegúrate de haber ejecutado la simulación.")
+else:
+    df.columns = [c.lower().strip() for c in df.columns]
+    df["status_effect"] = df["status_effect"].astype(str).str.lower().str.strip().replace({"": "none"})
+    df["pokeball_type"] = df["pokeball_type"].astype(str).str.strip()
+    df["success"] = df["success"].astype(bool)
+    pokemon_name = df["pokemon_name"].iloc[0].title()
+
+    known_order = ["burn", "freeze", "none", "paralysis", "poison", "sleep"]
+    status_order = [s for s in known_order if s in set(df["status_effect"])]
+    hue_order = sorted(df["pokeball_type"].unique())
+
+    # Compute per-group mean and binomial SE
+    stats = (
+        df.groupby(["status_effect", "pokeball_type"], as_index=False)["success"]
+          .agg(n="size", mean="mean")
+    )
+    stats["se"] = np.sqrt(stats["mean"] * (1.0 - stats["mean"]) / stats["n"])
+    stats["mean_pct"] = stats["mean"] * 100.0
+    stats["se_pct"] = stats["se"] * 100.0
+
+    # Weights so hist bars show the MEAN (%) per (status, ball)
+    # N per (status, ball) for each row
+    n_group = df.groupby(["status_effect", "pokeball_type"]).transform("size")
+    df = df.join(n_group.rename("n_group"))
+    df["weight_pct"] = df["success"].astype(int) * (100.0 / df["n_group"])
+
+    # Numeric x for discrete histogram bins
+    cats = pd.Categorical(df["status_effect"], categories=status_order, ordered=True)
+    df["status_code"] = cats.codes
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.histplot(
+        data=df,
+        x="status_code",
+        hue="pokeball_type",
+        hue_order=hue_order,
+        weights="weight_pct",
+        multiple="dodge",
+        bins=len(status_order),
+        discrete=True,
+        shrink=0.85,
+        stat="count",
+        ax=ax
+    )
+
+    # Add error bars
+    for i, status in enumerate(status_order):
+        for j, ball in enumerate(hue_order):
+            subset = stats[(stats["status_effect"] == status) & (stats["pokeball_type"] == ball)]
+            if not subset.empty:
+                x = i + (j - (len(hue_order) - 1) / 2) * 0.85 / len(hue_order)
+                ax.errorbar(
+                    x=x,
+                    y=subset["mean_pct"].values[0],
+                    yerr=subset["se_pct"].values[0],
+                    fmt='none',
+                    ecolor='black',
+                    capsize=3,
+                    linewidth=1
+                )
+
+    sns.move_legend(ax, "upper right", bbox_to_anchor=(1.18, 1),
+                    title="Pokeball Type", frameon=True)
+    fig.text(0.92, 0.62, "N = 100", fontsize=15, ha="center", va="center")
+
+    ax.set_xticks(np.arange(len(status_order)))
+    ax.set_xticklabels([s.title() for s in status_order], rotation=0)
+    ax.yaxis.set_major_formatter(PercentFormatter(100))
+    ax.set_xlabel("Status effect", fontsize=15, labelpad=15)
+    ax.set_ylabel("Mean success (%)", fontsize=15, labelpad=15)
+    ax.set_title(pokemon_name + " - Success capture by status effect",
+                   fontsize=16, fontweight='bold', pad=15)
+    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.savefig(f"../results/{pokemon_name}_capture_by_status_mean.png", dpi=200, bbox_inches="tight")
+    plt.show()
+    print(f"Saved: {pokemon_name}_capture_by_status_mean.png")
