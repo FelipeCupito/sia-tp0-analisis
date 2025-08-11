@@ -4,9 +4,70 @@ import pandas as pd
 from src.pokemon import PokemonFactory, StatusEffect
 from src.catching import attempt_catch
 import os
+import math
+from itertools import product
+
+EPS = 1e-9
+
+def _to_list(value):
+    """
+    Expand a JSON field that may be:
+      - a single value
+      - {"set": [...]}
+      - {"range": {"start": x, "end": y, "step": s}}
+      - {"linspace": {"start": x, "end": y, "num": n}}
+    Returns a Python list of concrete values.
+    """
+    if not isinstance(value, dict):
+        return [value]  # single value (backward compatible)
+
+    if "set" in value:
+        return list(value["set"])
+
+    if "range" in value:
+        r = value["range"]
+        start, end, step = float(r["start"]), float(r["end"]), float(r["step"])
+        out = []
+        v = start
+        # include end (with tolerance) to avoid floating point drift
+        while v <= end + EPS:
+            out.append(round(v, 10))
+            v += step
+        return out
+
+    if "linspace" in value:
+        ls = value["linspace"]
+        start, end, num = float(ls["start"]), float(ls["end"]), int(ls["num"])
+        if num <= 1:
+            return [start]
+        step = (end - start) / (num - 1)
+        return [round(start + i * step, 10) for i in range(num)]
+
+    raise ValueError(f"Unsupported collection spec: {value}")
+
+def expand_pokemon_config(pkm):
+    """
+    Given a single pokemon config possibly containing sets/ranges,
+    return a list of concrete configs (Cartesian product).
+    Always returns concrete primitives for level/hp_percentage/status_effect.
+    """
+    name = pkm["name"]
+    levels = _to_list(pkm.get("level", 50))
+    hp_values = _to_list(pkm.get("hp_percentage", 1.0))
+    statuses = _to_list(pkm.get("status_effect", "none"))
+
+    expanded = []
+    for lvl, hp, st in product(levels, hp_values, statuses):
+        expanded.append({
+            "name": name,
+            "level": int(lvl),
+            "hp_percentage": float(hp),
+            "status_effect": str(st)
+        })
+    return expanded
+
 
 def main():
-    # --- 1. Cargar Configuración ---
     config_path = sys.argv[1]
     if not os.path.exists(config_path):
         print(f"Error: El archivo de configuración '{config_path}' no fue encontrado.")
@@ -15,17 +76,12 @@ def main():
     with open(config_path, "r") as f:
         config = json.load(f)
 
-    # Parámetros de la simulación
     num_runs = config["simulation_params"].get("num_runs", 100)
     noise = config["simulation_params"].get("noise", 0.0)
 
-    # Parámetros de las Pokebolas
     pokeball_types = config["pokeball_params"].get("types", ["pokeball"])
 
-    # Archivo de salida
     output_file = config.get("output_file", "results.csv")
-    
-    # Asegurarse de que el directorio de salida exista
     output_dir = os.path.dirname(output_file)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
@@ -33,49 +89,41 @@ def main():
     print(f"Iniciando simulación. Se realizarán {num_runs} corridas por cada configuración.")
     print(f"Los resultados se guardarán en: {output_file}")
 
-    # --- 2. Ejecutar Simulación ---
     factory = PokemonFactory("pokemon.json")
     all_results = []
 
-    # Iterar sobre cada configuración de Pokémon definida en el JSON
-    for pkmn_config in config["pokemon_configs"]:
-        pokemon_name = pkmn_config["name"]
-        level = pkmn_config["level"]
-        hp_percentage = pkmn_config["hp_percentage"]
-        
-        # Convertir string de status a Enum de StatusEffect
-        status_str = pkmn_config.get("status_effect", "none").upper()
-        status_effect = StatusEffect[status_str]
+    for pkmn_cfg in config["pokemon_configs"]:
+        for concrete in expand_pokemon_config(pkmn_cfg):
+            pokemon_name = concrete["name"]
+            level = concrete["level"]
+            hp_percentage = concrete["hp_percentage"]
 
-        print(f"\nProcesando a {pokemon_name.capitalize()} (Lvl: {level}, HP: {hp_percentage*100}%, Estado: {status_effect.name})...")
+            status_str = str(concrete.get("status_effect", "none")).upper()
+            status_effect = StatusEffect[status_str]
 
-        # Probar cada tipo de Pokebola con la configuración actual del Pokémon
-        for ball in pokeball_types:
-            print(f"  Usando {ball.capitalize()}...")
-            for run in range(num_runs):
-                # Crear la instancia del Pokémon para cada corrida
-                pokemon = factory.create(pokemon_name, level, status_effect, hp_percentage)
+            print(f"\nProcesando {pokemon_name.capitalize()} "
+                  f"(Lvl: {level}, HP: {hp_percentage * 100:.0f}%, Estado: {status_effect.name})...")
 
-                # Intentar la captura
-                success, capture_rate = attempt_catch(pokemon, ball, noise)
+            pokemon = factory.create(pokemon_name, level, status_effect, hp_percentage)
+            for ball in pokeball_types:
+                print(f"  Usando {ball.capitalize()}...")
+                for run in range(num_runs):
+                    success, capture_rate = attempt_catch(pokemon, ball, noise)
+                    all_results.append({
+                        "run": run + 1,
+                        "pokemon_name": pokemon_name,
+                        "level": level,
+                        "hp_percentage": hp_percentage,
+                        "status_effect": status_effect.name,
+                        "pokeball_type": ball,
+                        "noise": noise,
+                        "success": bool(success),
+                        "capture_rate": capture_rate,
+                        "base_catch_rate": pokemon.catch_rate,
+                        "weight": pokemon.weight,
+                        "speed": pokemon.stats.speed
+                    })
 
-                # Guardar el resultado
-                all_results.append({
-                    "run": run + 1,
-                    "pokemon_name": pokemon_name,
-                    "level": level,
-                    "hp_percentage": hp_percentage,
-                    "status_effect": status_effect.name,
-                    "pokeball_type": ball,
-                    "noise": noise,
-                    "success": success,
-                    "capture_rate": capture_rate,
-                    "base_catch_rate": pokemon.catch_rate,
-                    "weight": pokemon.weight, 
-                    "speed": pokemon.stats.speed
-                })
-
-    # --- 3. Guardar Resultados ---
     if not all_results:
         print("No se generaron resultados. Revisa tu archivo de configuración.")
         return
