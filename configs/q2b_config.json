@@ -1,0 +1,48 @@
+{
+  "simulation_params": {
+    "num_runs": 1,
+    "noise": 0.0
+  },
+  "pokemon_configs": [
+    {
+      "name": "caterpie",
+      "level": 1,
+      "hp_percentage": {
+        "linspace": {
+          "start": 0.1,
+          "end": 1.0,
+          "num": 10
+        }
+      },
+      "status_effect": "none"
+    },
+    {
+      "name": "jolteon",
+      "level": 20,
+      "hp_percentage": {
+        "linspace": {
+          "start": 0.1,
+          "end": 1.0,
+          "num": 10
+        }
+      },
+      "status_effect": "none"
+    },
+    {
+      "name": "mewtwo",
+      "level": 100,
+      "hp_percentage": {
+        "linspace": {
+          "start": 0.1,
+          "end": 1.0,
+          "num": 10
+        }
+      },
+      "status_effect": "none"
+    }
+  ],
+  "pokeball_params": {
+    "types": ["pokeball", "ultraball", "fastball", "heavyball"]
+  },
+  "output_file": "results/q2b_hp_effect.csv"
+}
