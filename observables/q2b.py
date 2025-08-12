@@ -3,6 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import PercentFormatter
 from pathlib import Path
+import numpy as np
 
 try:
     df = pd.read_csv(Path("../results/q2b_hp_effect.csv"))
@@ -14,9 +15,28 @@ df.columns = [c.lower().strip() for c in df.columns]
 df["pokeball_type"] = df["pokeball_type"].astype(str).str.strip().str.capitalize()
 df["pokemon_name"] = df["pokemon_name"].str.capitalize()
 
-pokemon_names = df["pokemon_name"].unique()
+group_cols = ["pokemon_name", "pokeball_type", "hp_percentage"]
+if "level" in df.columns:
+    group_cols.append("level")
+
+grouped = df.groupby(group_cols)["capture_rate"]
+summary = grouped.agg(['mean', 'count', 'std']).reset_index()
+summary["capture_rate_std"] = summary["std"] / np.sqrt(summary["count"])
+summary = summary.rename(columns={"mean": "capture_rate"})
+
+# debug
+print("Standard Error Statistics:")
+print(f"Min: {summary['capture_rate_std'].min()}")
+print(f"Max: {summary['capture_rate_std'].max()}")
+print(f"Mean: {summary['capture_rate_std'].mean()}")
+
+pokemon_names = summary["pokemon_name"].unique()
+palette = sns.color_palette("tab10", n_colors=summary["pokeball_type"].nunique())
+pokeball_types = summary["pokeball_type"].unique()
+color_map = dict(zip(pokeball_types, palette))
+
 for pokemon_name in pokemon_names:
-    df_pokemon = df[df["pokemon_name"] == pokemon_name]
+    df_pokemon = summary[summary["pokemon_name"] == pokemon_name]
     plt.figure(figsize=(12, 8))
     sns.set_style("whitegrid")
 
@@ -29,8 +49,24 @@ for pokemon_name in pokemon_names:
         markers=True,
         dashes=False,
         linewidth=2.5,
-        markersize=8
+        markersize=8,
+        palette=color_map,
+        errorbar=None
     )
+
+    for pokeball_type, group in df_pokemon.groupby("pokeball_type"):
+        plt.errorbar(
+            group["hp_percentage"],
+            group["capture_rate"],
+            yerr=group["capture_rate_std"],
+            fmt='none',
+            capsize=5,
+            elinewidth=2.0,
+            label=None,
+            color=color_map[pokeball_type],
+            alpha=0.8,
+            zorder=20
+        )
 
     g.set_xlabel("HP %", fontsize=17, labelpad=15)
     g.set_ylabel("Capture Rate", fontsize=17, labelpad=15)
