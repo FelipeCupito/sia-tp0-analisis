@@ -85,3 +85,38 @@ else:
     fig.savefig(f"../results/{pokemon_name}_capture_by_status_mean.png", dpi=200, bbox_inches="tight")
     plt.show()
     print(f"Saved: {pokemon_name}_capture_by_status_mean.png")
+
+    # Heatmap showing pokeball types, status effects, and mean success
+    plt.figure(figsize=(10, 6))
+
+    heatmap_data = stats.pivot_table(
+        values="mean_pct",
+        index="status_effect",
+        columns="pokeball_type"
+    )
+
+    heatmap_data = heatmap_data.reindex(status_order)
+    ax = sns.heatmap(
+        heatmap_data,
+        annot=True,
+        cmap="YlGnBu",
+        fmt=".1f",
+        linewidths=0.5,
+        cbar_kws={'label': 'Success Rate (%)'}
+    )
+
+    current_y_labels = ax.get_yticklabels()
+    ax.set_yticklabels([label.get_text().title() for label in current_y_labels])
+    current_x_labels = ax.get_xticklabels()
+    ax.set_xticklabels([label.get_text().title() for label in current_x_labels])
+
+    plt.title(f"{pokemon_name} - Capture Rate by Status Effect and Pokeball Type",
+              fontsize=16, fontweight='bold', pad=20)
+
+    plt.xlabel("Pokeball Type", fontsize=14, labelpad=15)
+    plt.ylabel("Status Effect", fontsize=14, labelpad=15)
+    plt.tight_layout()
+    plt.savefig(f"../results/{pokemon_name}_capture_heatmap.png",
+                dpi=200, bbox_inches="tight")
+    plt.show()
+    print(f"Saved: {pokemon_name}_capture_heatmap.png")
