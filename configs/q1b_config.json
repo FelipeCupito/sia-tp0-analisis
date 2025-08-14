@@ -1,0 +1,42 @@
+{
+  "simulation_params": {
+    "num_runs": 100000,
+    "noise": 0.0
+  },
+  "pokemon_configs": [
+    {
+      "name": "jolteon",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    },
+    {
+      "name": "caterpie",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    },
+    {
+      "name": "snorlax",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    },
+    {
+      "name": "onix",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    },
+    {
+      "name": "mewtwo",
+      "level": 100,
+      "hp_percentage": 1.0,
+      "status_effect": "none"
+    }
+  ],
+  "pokeball_params": {
+    "types": ["pokeball", "ultraball", "fastball", "heavyball"]
+  },
+  "output_file": "results/q1a_pokeball_avg_effectiveness.csv"
+}

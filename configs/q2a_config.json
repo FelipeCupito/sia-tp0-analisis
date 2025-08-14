@@ -1,6 +1,6 @@
 {
   "simulation_params": {
-    "num_runs": 100,
+    "num_runs": 10000,
     "noise": 0.0
   },
   "pokemon_configs": [
