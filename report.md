@@ -42,3 +42,12 @@ En este caso tambien parece existir un umbral de velocidad por el cual se aplica
 Para responder esta pregunta realizamos 10000 corridas para todos los efectos de salud y todas las pokebolas, utilizando a Jolteon como ejemplo. La decisión de utilizar a Jolteon es que es uno de los pokemons con tasa de captura media, lo que significa que estamos mas lejos de saturar a tasas de capturas muy bajas o muy altas. Para visualizar los resultados tenemos las siguientes graficas:
 ![Histograma con tasas de efectivada en cada estado de salud](./imgs/q2a_hist.png)
 ![Heatmap con las tasas de efectividad para cada estado y pokebola](./imgs/q2a_heat.png)
+
+### c) ¿Qué parámetros son los que más afectan la probabilidad de captura?
+
+#### Efecto del nivel sobre la probabilidad de captura
+![Efecto del nivel sobre la probabilidad de captura](./imgs/q2c_pokeball_baseline_facet_by_level.png)
+
+El análisis por nivel (1–100) indica que, para cada tipo de pokébola, las curvas de probabilidad de captura se mantienen prácticamente **horizontales** en las tres especies evaluadas — Caterpie (Capture Rate: 255), Jolteon (Capture Rate: 45) y Mewtwo (Capture Rate: 3).
+Esto sugiere que el **nivel del Pokémon no tiene un impacto significativo** en la probabilidad de captura, al menos dentro del rango de niveles evaluados. Las diferencias observadas entre los niveles son mínimas y no muestran una tendencia clara hacia un aumento o disminución de la probabilidad de captura a medida que aumenta el nivel del Pokémon.
+Es decir, el **nivel no constituye un determinante relevante** de la probabilidad de captura en esta configuración.
