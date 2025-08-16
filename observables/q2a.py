@@ -72,16 +72,15 @@ else:
 
     sns.move_legend(ax, "upper right", bbox_to_anchor=(1.18, 1),
                     title="Pokeball Type", frameon=True)
-    fig.text(0.92, 0.62, "N = 100", fontsize=15, ha="center", va="center")
 
     ax.set_xticks(np.arange(len(status_order)))
     ax.set_xticklabels([s.title() for s in status_order], rotation=0)
     ax.yaxis.set_major_formatter(PercentFormatter(100))
     ax.set_xlabel("Status effect", fontsize=15, labelpad=15)
     ax.set_ylabel("Mean success (%)", fontsize=15, labelpad=15)
-    ax.set_title(pokemon_name + " - Success capture by status effect",
-                   fontsize=16, fontweight='bold', pad=15)
-    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    ax.set_title(f"Capture Rate by Status Effect\n- {pokemon_name} -",
+                   fontsize=16, fontweight='bold')
+    fig.tight_layout(rect=[0, 0, 1, 0.99])
     fig.savefig(f"../results/{pokemon_name}_capture_by_status_mean.png", dpi=200, bbox_inches="tight")
     plt.show()
     print(f"Saved: {pokemon_name}_capture_by_status_mean.png")
@@ -99,10 +98,10 @@ else:
     ax = sns.heatmap(
         heatmap_data,
         annot=True,
-        cmap="YlGnBu",
+        cmap="PuBuGn",
         fmt=".1f",
         linewidths=0.5,
-        cbar_kws={'label': 'Success Rate (%)'}
+        cbar_kws={'label': 'Mean Success (%)'}
     )
 
     current_y_labels = ax.get_yticklabels()
@@ -110,7 +109,7 @@ else:
     current_x_labels = ax.get_xticklabels()
     ax.set_xticklabels([label.get_text().title() for label in current_x_labels])
 
-    plt.title(f"{pokemon_name} - Capture Rate by Status Effect and Pokeball Type",
+    plt.title(f"Capture Rate by Status Effect\n- {pokemon_name} -",
               fontsize=16, fontweight='bold', pad=20)
 
     plt.xlabel("Pokeball Type", fontsize=14, labelpad=15)

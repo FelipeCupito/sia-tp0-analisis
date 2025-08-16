@@ -70,7 +70,6 @@ for pokemon_name in pokemon_names:
 
     g.set_xlabel("HP %", fontsize=17, labelpad=15)
     g.set_ylabel("Capture Rate", fontsize=17, labelpad=15)
-    g.set_title("Effect of HP % on Capture Rate", fontsize=16, fontweight='bold', pad=30, loc='center')
     g.xaxis.set_major_formatter(PercentFormatter(1.0))
     g.yaxis.set_major_formatter(PercentFormatter(1.0))
 
@@ -78,9 +77,10 @@ for pokemon_name in pokemon_names:
     plt.legend(title="Pokeball Type", bbox_to_anchor=(1, 1), loc="upper right", fontsize=15)
     pokemon_level = df_pokemon["level"].iloc[0] if "level" in df_pokemon.columns and not df_pokemon["level"].empty else "Unknown"
     pokemon_info = f"{pokemon_name} (Level {pokemon_level})"
-    plt.figtext(0.5, 0.94, pokemon_info, fontsize=15, ha="center", va="top", bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
-    output_path = f"../results/{pokemon_name}_{pokemon_level}_hp_effect.png"
+    plt.figtext(0.5, 0.97, pokemon_info, fontsize=16, ha="center", va="top", bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
     plt.tight_layout()
+    plt.subplots_adjust(top=0.93)
+    output_path = f"../results/{pokemon_name}_{pokemon_level}_hp_effect.png"
     plt.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.show()
     print(f"Saved: {output_path}")
